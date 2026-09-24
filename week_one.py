@@ -4,7 +4,7 @@ Week 1 labs, Quantum Many Body
 
 Created on Thu Sep 24 12:16:27 2026
 
-@author: Maks Selevic, Joe MArtin
+@author: Maks Selevic, Joe Martin
 """
 # Imports
 import numpy as np
