@@ -20,24 +20,24 @@ def check_hermitian(matrix):
         result = "No!"
     print(f"Is the calculated Hamiltonian Hermitian? {result}"+"\n")
 
-# Variables
-# Spin elements in x, y and z directions
-sx = 0.5*np.array([[0, 1], [1,0]])
-sy = 0.5*np.array([[0, -1.0j], [1.0j, 0]])
-sz = 0.5*np.array([[1, 0], [0, -1]])
-
 def plot_table(matrix):
     fig, ax = plt.subplots()
     norm = plt.Normalize(-1, 1)
     table = ax.table(cellText=matrix,
                      loc=(0,0), cellLoc="center",
-                     cellColours=plt.cm.seismic(norm(matrix)))
+                     cellColours=plt.cm.coolwarm_r(norm(matrix)))
     for i in range(len(matrix)):
         for j in range(len(matrix)):
             cell = table[i, j]
             cell.set_height(1/len(matrix))
     ax.set_xticks([])
     ax.set_yticks([])
+
+# Variables
+# Spin elements in x, y and z directions
+sx = 0.5*np.array([[0, 1], [1,0]])
+sy = 0.5*np.array([[0, -1.0j], [1.0j, 0]])
+sz = 0.5*np.array([[1, 0], [0, -1]])
 
 ###############################################################################
 # Problem 2
@@ -66,5 +66,6 @@ eigvals, eigvecs = np.linalg.eigh(hamiltonian)
 
 print(f"The eigenvalues of the Hamiltonian are {eigvals}")
 
+plot_table(np.round(eigvecs.real, 4))
 
 
