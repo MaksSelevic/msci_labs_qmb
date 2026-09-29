@@ -9,6 +9,7 @@ Created on Thu Sep 24 12:16:27 2026
 # Imports
 import numpy as np
 import scipy.linalg as lin
+import matplotlib.pyplot as plt
 
 # Function definitions
 def check_hermitian(matrix):
@@ -25,6 +26,19 @@ sx = 0.5*np.array([[0, 1], [1,0]])
 sy = 0.5*np.array([[0, -1.0j], [1.0j, 0]])
 sz = 0.5*np.array([[1, 0], [0, -1]])
 
+def plot_table(matrix):
+    fig, ax = plt.subplots()
+    norm = plt.Normalize(-1, 1)
+    table = ax.table(cellText=matrix,
+                     loc=(0,0), cellLoc="center",
+                     cellColours=plt.cm.seismic(norm(matrix)))
+    for i in range(len(matrix)):
+        for j in range(len(matrix)):
+            cell = table[i, j]
+            cell.set_height(1/len(matrix))
+    ax.set_xticks([])
+    ax.set_yticks([])
+
 ###############################################################################
 # Problem 2
 ###############################################################################
@@ -39,6 +53,9 @@ hamiltonian = np.sum((sx_sx,sy_sy, sz_sz), axis=0)
 
 # Checking for hermiticity
 check_hermitian(hamiltonian)
+
+# Creating a table showing the Hamiltonian
+plot_table(hamiltonian.real)
 
 ###############################################################################
 # Problem 3
