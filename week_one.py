@@ -20,7 +20,7 @@ def check_hermitian(matrix):
         result = "No!"
     print(f"Is the calculated Hamiltonian Hermitian? {result}"+"\n")
 
-def plot_table(matrix):
+def plot_table(matrix, title):
     fig, ax = plt.subplots()
     norm = plt.Normalize(-1, 1)
     table = ax.table(cellText=matrix,
@@ -32,6 +32,7 @@ def plot_table(matrix):
             cell.set_height(1/len(matrix))
     ax.set_xticks([])
     ax.set_yticks([])
+    ax.set_title(title)
 
 # Variables
 # Spin elements in x, y and z directions
@@ -55,7 +56,7 @@ hamiltonian = np.sum((sx_sx,sy_sy, sz_sz), axis=0)
 check_hermitian(hamiltonian)
 
 # Creating a table showing the Hamiltonian
-plot_table(hamiltonian.real)
+plot_table(hamiltonian.real, "The Hamiltonian")
 
 ###############################################################################
 # Problem 3
@@ -66,6 +67,12 @@ eigvals, eigvecs = np.linalg.eigh(hamiltonian)
 
 print(f"The eigenvalues of the Hamiltonian are {eigvals}")
 
-plot_table(np.round(eigvecs.real, 4))
+plot_table(np.round(eigvecs.real, 4), "Eigenvectors of the Hamiltonian")
+
+###############################################################################
+# Problem 4
+###############################################################################
+
+
 
 
