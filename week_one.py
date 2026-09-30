@@ -47,6 +47,12 @@ def randomised_state(n):
     coefficients = coefficients/np.linalg.norm(coefficients)
     return coefficients
 
+def rayleigh_quotient(state, hamiltonian):
+    bra = state.conj().T
+    coefficient = np.dot(np.dot(bra,hamiltonian), state)
+    coefficient = coefficient
+    return coefficient.real
+
 # Variables
 # Spin elements in x, y and z directions
 sx = 0.5*np.array([[0, 1], [1,0]])
@@ -85,12 +91,23 @@ eigvals, eigvecs = np.linalg.eigh(hamiltonian)
 
 print(f"The eigenvalues of the Hamiltonian are {eigvals}")
 
+# Plotting the table of eigenvectors for easier visualisation
 plot_table(np.round(eigvecs.real, 4), "Eigenvectors of the Hamiltonian")
 
 ###############################################################################
 # Problem 4
 ###############################################################################
-print(check_normalisation(trial_product))
+print(f"""
+Checking if the trial states are normalised:
+Singlet (ground) state: {'Yes' if check_normalisation(trial_singlet) == True else "No"}
+Pure up/up state: {'Yes' if check_normalisation(trial_triplet_uu) == True else "No"}
+Randomised product state: {'Yes' if check_normalisation(trial_product) == True else "No"}
+""")
 
+print(f"""The Rayleigh quotient of the trial states are:
+{rayleigh_quotient(trial_singlet, hamiltonian): .2f} for the singlet (ground) state,
+{rayleigh_quotient(trial_triplet_uu, hamiltonian): .2f} for the pure up/up state,
+{rayleigh_quotient(trial_product, hamiltonian): .2f} for the randomised product state.
+""")
 
 
