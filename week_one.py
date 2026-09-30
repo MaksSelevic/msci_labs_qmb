@@ -50,7 +50,6 @@ def randomised_state(n):
 def rayleigh_quotient(state, hamiltonian):
     bra = state.conj().T
     coefficient = np.dot(np.dot(bra,hamiltonian), state)
-    coefficient = coefficient
     return coefficient.real
 
 # Variables
