@@ -34,11 +34,29 @@ def plot_table(matrix, title):
     ax.set_yticks([])
     ax.set_title(title)
 
+def check_normalisation(state):
+    norm = np.linalg.norm(state)
+    return np.isclose(norm, 1)
+
+def randomised_state(n):
+    coefficients = np.zeros(n, dtype = complex)
+    for n in range(n):
+        r = np.random.uniform(0, 1)
+        theta = np.random.uniform(0, 2*np.pi)
+        coefficients[n] = r*np.cos(theta)+1.0j*r*np.sin(theta)
+    coefficients = coefficients/np.linalg.norm(coefficients)
+    return coefficients
+
 # Variables
 # Spin elements in x, y and z directions
 sx = 0.5*np.array([[0, 1], [1,0]])
 sy = 0.5*np.array([[0, -1.0j], [1.0j, 0]])
 sz = 0.5*np.array([[1, 0], [0, -1]])
+
+# Trial States
+trial_singlet = np.array([0, 1/np.sqrt(2), -1/np.sqrt(2), 0])
+trial_triplet_uu = np.array([1, 0, 0, 0])
+trial_product = randomised_state(4)
 
 ###############################################################################
 # Problem 2
@@ -72,7 +90,7 @@ plot_table(np.round(eigvecs.real, 4), "Eigenvectors of the Hamiltonian")
 ###############################################################################
 # Problem 4
 ###############################################################################
-
+print(check_normalisation(trial_product))
 
 
 
