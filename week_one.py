@@ -48,8 +48,10 @@ def rayleigh_quotient(state, hamiltonian):
     coefficient = np.dot(np.dot(bra,hamiltonian), state)
     return coefficient.real
 
-def add_perturbation():
-    pass
+def perturbation(state, perturbation_weight):
+    perturbed_state = np.sqrt(1-perturbation_weight)*state+np.sqrt(perturbation_weight)*randomised_state(4)
+    print(perturbed_state)
+    return perturbed_state/np.linalg.norm(perturbed_state)
 
 # Variables
 # Spin elements in x, y and z directions
@@ -61,6 +63,9 @@ sz = 0.5*np.array([[1, 0], [0, -1]])
 trial_singlet = np.array([0, 1/np.sqrt(2), -1/np.sqrt(2), 0])
 trial_triplet_uu = np.array([1, 0, 0, 0])
 trial_product = randomised_state(4)
+
+trial_perturbation_weight = 0.1
+trial_perturbed_state = perturbation(trial_singlet, trial_perturbation_weight)
 
 ###############################################################################
 # Problem 2
@@ -78,7 +83,7 @@ hamiltonian = np.sum((sx_sx,sy_sy, sz_sz), axis=0)
 check_hermitian(hamiltonian)
 
 # Creating a table showing the Hamiltonian
-plot_table(hamiltonian.real, "The Hamiltonian")
+#plot_table(hamiltonian.real, "The Hamiltonian")
 
 ###############################################################################
 # Problem 3
@@ -90,7 +95,7 @@ eigvals, eigvecs = np.linalg.eigh(hamiltonian)
 print(f"The eigenvalues of the Hamiltonian are {eigvals}")
 
 # Plotting the table of eigenvectors for easier visualisation
-plot_table(np.round(eigvecs.real, 4), "Eigenvectors of the Hamiltonian")
+#plot_table(np.round(eigvecs.real, 4), "Eigenvectors of the Hamiltonian")
 
 ###############################################################################
 # Problem 4
@@ -100,12 +105,15 @@ Checking if the trial states are normalised:
 Singlet (ground) state: {'Yes' if check_normalisation(trial_singlet) == True else "No"}
 Pure up/up state: {'Yes' if check_normalisation(trial_triplet_uu) == True else "No"}
 Randomised product state: {'Yes' if check_normalisation(trial_product) == True else "No"}
+Perturbed state ({(1.0-trial_perturbation_weight)*100:.0f}% Ground State): {'Yes' if check_normalisation(trial_perturbed_state) == True else "No"}
 """)
 
 print(f"""The Rayleigh quotient of the trial states are:
 {rayleigh_quotient(trial_singlet, hamiltonian): .2f} for the singlet (ground) state,
 {rayleigh_quotient(trial_triplet_uu, hamiltonian): .2f} for the pure up/up state,
 {rayleigh_quotient(trial_product, hamiltonian): .2f} for the randomised product state.
+{rayleigh_quotient(trial_perturbed_state, hamiltonian): .2f} for the trial perturbed state. ({(1.0-trial_perturbation_weight)*100:.0f}% Ground State)
 """)
+
 
 
