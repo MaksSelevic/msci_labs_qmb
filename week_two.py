@@ -48,8 +48,10 @@ def create_operators(size):
 
     return sx_operators, sy_operators, sz_operators
 
-def evaluate_commutator(A, B):
-    return np.dot(A,B)-np.dot(B,A)
+def evaluate_commutator(A, B, expectation):
+    commutator = np.dot(A,B)-np.dot(B,A)
+    return np.allclose(commutator, expectation)
+
 
 def plot_table(matrix, title):
     fig, ax = plt.subplots()
@@ -71,7 +73,6 @@ sx_operators, sy_operators, sz_operators = create_operators(4)
 # Main Code
 #plot_table(sx_operators[2], "Sx operator of the third particle")
 
-sx2_sz2 = evaluate_commutator(sx_operators[2], sz_operators[2])
+sx2_sz2 = evaluate_commutator(sx_operators[2], sz_operators[2], -1j*sy_operators[2])
+print(f"Is the Sx2 and Sz2 commutator equivalent to -i*Sy2? {"Yes!" if sx2_sz2 else "No!"}")
 
-plot_table(sx2_sz2, "Commutator between sx2 and sz2")
-plot_table((-1.0j*sy_operators[2]).real, "-i*sy2 operator")
