@@ -14,11 +14,7 @@ import matplotlib.pyplot as plt
 # Function definitions
 def check_hermitian(matrix):
     state = lin.ishermitian(matrix)
-    if state == True:
-        result = "Yes!"
-    elif state == False:
-        result = "No!"
-    print(f"Is the calculated Hamiltonian Hermitian? {result}"+"\n")
+    print(f"Is the calculated Hamiltonian Hermitian? {"Yes!" if state else "No!"}"+"\n")
 
 def plot_table(matrix, title):
     fig, ax = plt.subplots()
@@ -51,6 +47,9 @@ def rayleigh_quotient(state, hamiltonian):
     bra = state.conj().T
     coefficient = np.dot(np.dot(bra,hamiltonian), state)
     return coefficient.real
+
+def add_perturbation():
+    pass
 
 # Variables
 # Spin elements in x, y and z directions
