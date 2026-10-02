@@ -48,7 +48,7 @@ def rayleigh_quotient(state, hamiltonian):
     coefficient = np.dot(np.dot(bra,hamiltonian), state)
     return coefficient.real
 
-def perturbation(state, perturbation_weight):
+def perturbation_mixture(state, perturbation_weight):
     perturbation = randomised_state(4)
     perturbation -= np.dot(state, perturbation)*state
     perturbation /= np.linalg.norm(perturbation)
@@ -56,12 +56,28 @@ def perturbation(state, perturbation_weight):
     perturbed_state = np.cos(perturbation_weight)*state+np.sin(perturbation_weight)*perturbation
     return perturbed_state/np.linalg.norm(perturbed_state)
 
+def perturb_ground(theta):
+    randomised_directions = randomised_state(3)
+    adjustment = (1/np.sqrt(2))*np.cos(theta)
+    perturbed_state = np.zeros(4, dtype = complex)
+    perturbed_state[0] = randomised_directions[0]
+    perturbed_state[1] = randomised_directions[1]
+    perturbed_state[2] = randomised_directions[1]
+    perturbed_state[3] = randomised_directions[2]
+
+    perturbed_state /= np.linalg.norm(perturbed_state)
+    perturbed_state *= np.sin(theta)
+    
+    perturbed_state[1] += adjustment
+    perturbed_state[2] -= adjustment
+    return perturbed_state
+
 def progressive_perturbation(n, state, hamiltonian, max_perturbation):
     energy_differences = []
     perturbation_size = []
     state_energy = rayleigh_quotient(state, hamiltonian)
     for perturbation_weight in np.linspace(10e-4, max_perturbation, n):
-        perturbed_state = perturbation(state, perturbation_weight)#, perturbation_direction)
+        perturbed_state = perturbation_mixture(state, perturbation_weight)#, perturbation_direction)
         energy_difference = rayleigh_quotient(perturbed_state, hamiltonian) - state_energy
         energy_differences.append(energy_difference)
         perturbation_size.append(perturbation_weight)
@@ -78,9 +94,11 @@ trial_singlet = np.array([0, 1/np.sqrt(2), -1/np.sqrt(2), 0])
 trial_triplet_uu = np.array([1, 0, 0, 0])
 trial_product = randomised_state(4)
 
-trial_perturbation_direction = trial_triplet_uu
 trial_perturbation_weight = 0.1
-trial_perturbed_state = perturbation(trial_singlet, trial_perturbation_weight)#, trial_perturbation_direction)
+trial_perturbed_state_mix = perturbation_mixture(trial_singlet, trial_perturbation_weight)
+
+trial_perturbation_angle = 0.5
+trial_perturbed_state_ground = perturb_ground(trial_perturbation_angle)
 
 ###############################################################################
 # Problem 2
@@ -120,14 +138,16 @@ Checking if the trial states are normalised:
 Singlet (ground) state: {'Yes' if check_normalisation(trial_singlet) == True else "No"}
 Pure up/up state: {'Yes' if check_normalisation(trial_triplet_uu) == True else "No"}
 Randomised product state: {'Yes' if check_normalisation(trial_product) == True else "No"}
-Perturbed state ({(1.0-trial_perturbation_weight)*100:.0f}% Ground State): {'Yes' if check_normalisation(trial_perturbed_state) == True else "No"}
+Perturbed state (Mixture Method): ({(1.0-trial_perturbation_weight)*100:.0f}% Ground State): {'Yes' if check_normalisation(trial_perturbed_state_mix) == True else "No"}
+Perturbed state (Angle Method): {'Yes' if check_normalisation(trial_perturbed_state_ground) == True else "No"}
 """)
 
 print(f"""The Rayleigh quotient of the trial states are:
 {rayleigh_quotient(trial_singlet, hamiltonian): .2f} for the singlet (ground) state,
 {rayleigh_quotient(trial_triplet_uu, hamiltonian): .2f} for the pure up/up state,
 {rayleigh_quotient(trial_product, hamiltonian): .2f} for the randomised product state.
-{rayleigh_quotient(trial_perturbed_state, hamiltonian): .2f} for the trial perturbed state. ({(1.0-trial_perturbation_weight)*100:.0f}% Ground State)
+{rayleigh_quotient(trial_perturbed_state_mix, hamiltonian): .2f} for the trial perturbed state (Mixture Method). ({(1.0-trial_perturbation_weight)*100:.0f}% Ground State)
+{rayleigh_quotient(trial_perturbed_state_ground, hamiltonian): .2f} for the trial perturbed state (Angle Method).
 """)
 
 y, x = progressive_perturbation(100, trial_singlet, hamiltonian, np.pi/50)
