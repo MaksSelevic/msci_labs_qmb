@@ -48,23 +48,24 @@ def rayleigh_quotient(state, hamiltonian):
     coefficient = np.dot(np.dot(bra,hamiltonian), state)
     return coefficient.real
 
-def perturbation(state, perturbation_weight):#, perturbation_direction = "random"):
-    #if type(perturbation_direction) == str:
-    #    perturbation_direction = randomised_state(4)
-    perturbed_state= np.sqrt(1-perturbation_weight)*state+np.sqrt(perturbation_weight)*randomised_state(4)#perturbation_direction
+def perturbation(state, perturbation_weight):
+    perturbation = randomised_state(4)
+    perturbation -= np.dot(state, perturbation)*state
+    perturbation /= np.linalg.norm(perturbation)
+    #perturbed_state = np.sqrt(1-perturbation_weight)*state+np.sqrt(perturbation_weight)*perturbation
+    perturbed_state = np.cos(perturbation_weight)*state+np.sin(perturbation_weight)*perturbation
     return perturbed_state/np.linalg.norm(perturbed_state)
 
-#def progressive_perturbation(n, state, hamiltonian, max_perturbation):
-#    energy_differences = []
-#    perturbation_size = []
-#    state_energy = rayleigh_quotient(state, hamiltonian)
-#    perturbation_direction = np.array([0, 1/np.sqrt(2), -1/np.sqrt(2), 0.1])
-#    for perturbation_weight in np.linspace(0, max_perturbation, n):
-#        perturbed_state = perturbation(state, perturbation_weight, perturbation_direction)
-#        energy_difference = rayleigh_quotient(perturbed_state, hamiltonian) - state_energy
-#        energy_differences.append(energy_difference)
-#        perturbation_size.append(perturbation_weight)
-#    return np.array(energy_differences), np.array(perturbation_size)    
+def progressive_perturbation(n, state, hamiltonian, max_perturbation):
+    energy_differences = []
+    perturbation_size = []
+    state_energy = rayleigh_quotient(state, hamiltonian)
+    for perturbation_weight in np.linspace(10e-4, max_perturbation, n):
+        perturbed_state = perturbation(state, perturbation_weight)#, perturbation_direction)
+        energy_difference = rayleigh_quotient(perturbed_state, hamiltonian) - state_energy
+        energy_differences.append(energy_difference)
+        perturbation_size.append(perturbation_weight)
+    return np.array(energy_differences), np.array(perturbation_size)    
 
 # Variables
 # Spin elements in x, y and z directions
@@ -129,4 +130,18 @@ print(f"""The Rayleigh quotient of the trial states are:
 {rayleigh_quotient(trial_perturbed_state, hamiltonian): .2f} for the trial perturbed state. ({(1.0-trial_perturbation_weight)*100:.0f}% Ground State)
 """)
 
+y, x = progressive_perturbation(100, trial_singlet, hamiltonian, np.pi/50)
 
+plt.show()
+a, s, d = np.polyfit(x, y, 2)
+plt.scatter(x, y)
+plt.plot(x, a*x*x+s*x+d, color="red", label=f"Quadratic coefficients: ({a:.2f})x^2+({s:.2f})x+({d:.2f})")
+plt.title("Perturbation Amplitude vs Energy Difference")
+plt.legend()
+plt.show()
+
+plt.scatter(np.log(x),np.log(y))
+plt.title("Log of Perturbation Amplitude vs Log of Energy Difference")
+m, c = np.polyfit(np.log(x), np.log(y), 1)
+plt.plot(np.log(x), m*np.log(x)+c, color="red", label=f"Gradient of {m:.3f}")
+plt.legend()
