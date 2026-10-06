@@ -58,7 +58,7 @@ def plot_table(matrix, title):
     norm = plt.Normalize(-1, 1)
     table = ax.table(cellText=matrix,
                      loc=(0,0), cellLoc="center",
-                     cellColours=plt.cm.coolwarm_r(norm(matrix)))
+                     cellColours=plt.cm.coolwarm_r(norm(np.abs(matrix))))
     for i in range(len(matrix)):
         for j in range(len(matrix)):
             cell = table[i, j]
@@ -68,10 +68,12 @@ def plot_table(matrix, title):
     ax.set_title(title)
 
 # Variables
-sx_operators, sy_operators, sz_operators = create_operators(4)
+n = 4
+sx_operators, sy_operators, sz_operators = create_operators(n)
 
 # Main Code
-#plot_table(sx_operators[2], "Sx operator of the third particle")
+plot_table(sy_operators[3], f"Sy operator of the fourth particle, n = {n}")
+plot_table(sx_operators[2], f"Sx operator of the third particle, n = {n}")
 
 sx2_sz2 = evaluate_commutator(sx_operators[2], sz_operators[2], -1j*sy_operators[2])
 print(f"Is the Sx2 and Sz2 commutator equivalent to -i*Sy2? {"Yes!" if sx2_sz2 else "No!"}")

@@ -21,7 +21,7 @@ def plot_table(matrix, title):
     norm = plt.Normalize(-1, 1)
     table = ax.table(cellText=matrix,
                      loc=(0,0), cellLoc="center",
-                     cellColours=plt.cm.coolwarm_r(norm(matrix)))
+                     cellColours=plt.cm.coolwarm_r(norm(np.abs(matrix))))
     for i in range(len(matrix)):
         for j in range(len(matrix)):
             cell = table[i, j]
@@ -77,7 +77,7 @@ def progressive_perturbation_mix(n, state, hamiltonian, max_perturbation):
     perturbation_size = []
     state_energy = rayleigh_quotient(state, hamiltonian)
     for perturbation_weight in np.linspace(10e-4, max_perturbation, n):
-        perturbed_state = perturbation_mixture(state, perturbation_weight)#, perturbation_direction)
+        perturbed_state = perturbation_mixture(state, perturbation_weight)
         energy_difference = rayleigh_quotient(perturbed_state, hamiltonian) - state_energy
         energy_differences.append(energy_difference)
         perturbation_size.append(perturbation_weight)
@@ -165,9 +165,12 @@ y, x = progressive_perturbation_mix(100, trial_singlet, hamiltonian, np.pi/50)
 plt.show()
 a, s, d = np.polyfit(x, y, 2)
 plt.scatter(x, y)
-plt.plot(x, a*x*x+s*x+d, color="red", label=f"Quadratic coefficients: ({a:.2f})x^2+({s:.2f})x+({d:.2f})")
-plt.title("Perturbation Weight vs Energy Difference")
-plt.legend()
+#plt.plot(x, a*x*x+s*x+d, color="red", label=f"Quadratic coefficients: ({a:.2f})x^2+({s:.2f})x+({d:.2f})")
+plt.plot(x, s*x+d, color="red", label=(f"Gradient: {s:.2f}"+"\n"+f"Intercept: {d:.2f}"))
+plt.xlabel("Perturbation Weight")
+plt.ylabel("Energy Difference")
+#plt.title("Perturbation Weight vs Energy Difference")
+plt.legend(title="Line of Best Fit")
 plt.show()
 
 plt.scatter(np.log(x),np.log(y))
@@ -179,6 +182,7 @@ plt.show()
 
 e_diff, p_ang = progressive_perturbation_angle(1000, 0, np.pi, hamiltonian)
 
+
 plt.scatter(p_ang, e_diff)
 plt.plot(p_ang, (np.sin(p_ang))**2, color="red", label="sin^2(Perturbation Angle)")
 #plt.title("Perturbation Angle vs Energy Difference")
@@ -186,6 +190,17 @@ plt.xlabel("Perturbation Angle")
 plt.ylabel("Energy Difference")
 plt.legend()
 plt.show()
+
+#o, p = np.polyfit(np.log(p_ang), np.log(e_diff), 1)
+
+#plt.scatter(np.log(p_ang), np.log(e_diff))
+#plt.plot(p_ang, (np.sin(p_ang))**2, color="red", label="sin^2(Perturbation Angle)")
+#plt.plot(np.log(p_ang), o*np.log(p_ang)+p, color="red", label=(f"Gradient: {o:.2f}"+"\n"+f"Intercept: {p:.2f}"))
+#plt.title("Perturbation Angle vs Energy Difference")
+#plt.xlabel("Log of Perturbation Angle")
+#plt.ylabel("Log of Energy Difference")
+#plt.legend(title="Line of Best Fit")
+#plt.show()
 
 plt.scatter(np.cos(p_ang), e_diff)
 plt.plot(np.cos(p_ang), np.sin(p_ang)**2, color="red", label="sin^2(Perturbation Angle)")
