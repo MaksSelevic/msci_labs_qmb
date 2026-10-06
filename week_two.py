@@ -67,9 +67,9 @@ def plot_table(matrix, title):
     ax.set_yticks([])
     ax.set_title(title)
 
-def operators_memory_usage(n_particles, output_unit):
+def operators_memory_usage_dense(n_particles, output_unit):
     n_elements = (2**n_particles)**2
-    #Number of elements * bytes per element * 3 dimensions (xyz) * Number of particles
+    # Number of elements * bytes per element * 3 dimensions (xyz) * Number of particles
     memory_bytes = n_elements*16*3*n_particles 
     if output_unit == "b":
         return memory_bytes/8
@@ -94,14 +94,53 @@ sx_operators, sy_operators, sz_operators = create_operators(n)
 # Problem 4
 ###############################################################################
 
-plot_table(sy_operators[3], f"Sy operator of the fourth particle, n = {n}")
-plot_table(sx_operators[2], f"Sx operator of the third particle, n = {n}")
+#plot_table(sy_operators[3], f"Sy operator of the fourth particle, n = {n}")
+#plot_table(sx_operators[2], f"Sx operator of the third particle, n = {n}")
 
-sx2_sz2 = evaluate_commutator(sx_operators[2], sz_operators[2], -1j*sy_operators[2])
-print(f"Is the Sx2 and Sz2 commutator equivalent to -i*Sy2? {"Yes!" if sx2_sz2 else "No!"}")
+#sx2_sz2 = evaluate_commutator(sx_operators[2], sz_operators[2], -1j*sy_operators[2])
+#print(f"Is the Sx2 and Sz2 commutator equivalent to -i*Sy2? {"Yes!" if sx2_sz2 else "No!"}")
 
 ###############################################################################
 # Problem 5
 ###############################################################################
 
-print(operators_memory_usage(12, "GB"))
+#print(f"{operators_memory_usage_dense(13, "GB"):.3f}")
+
+memory_n_gb = 16
+memory_n_mb = 11
+memory_n_kb = 6
+
+range_gb = range(10, memory_n_gb+1)
+range_mb = range(5, memory_n_mb+1)
+range_kb = range(1, memory_n_kb+1)
+
+memory_needed_gb = []
+memory_needed_mb = []
+memory_needed_kb = []
+
+for n in range_gb:
+    memory = operators_memory_usage_dense(n, "GB")
+    memory_needed_gb.append(memory)
+
+for n in range_mb:
+    memory = operators_memory_usage_dense(n, "MB")
+    memory_needed_mb.append(memory)
+
+for n in range_kb:
+    memory = operators_memory_usage_dense(n, "KB")
+    memory_needed_kb.append(memory)
+
+plt.scatter(range_gb, memory_needed_gb)
+plt.xlabel("Number of particles")
+plt.ylabel("Memory required for Operators (GB)")
+plt.show()
+
+plt.scatter(range_mb, memory_needed_mb)
+plt.xlabel("Number of particles")
+plt.ylabel("Memory required for Operators (MB)")
+plt.show()
+
+kb_scatter = plt.scatter(range_kb, memory_needed_kb)
+plt.xlabel("Number of particles")
+plt.ylabel("Memory required for Operators (KB)")
+plt.show()
