@@ -67,14 +67,41 @@ def plot_table(matrix, title):
     ax.set_yticks([])
     ax.set_title(title)
 
+def operators_memory_usage(n_particles, output_unit):
+    n_elements = (2**n_particles)**2
+    #Number of elements * bytes per element * 3 dimensions (xyz) * Number of particles
+    memory_bytes = n_elements*16*3*n_particles 
+    if output_unit == "b":
+        return memory_bytes/8
+    elif output_unit == "B":
+        return memory_bytes
+    elif output_unit == "KB":
+        return memory_bytes/1024
+    elif output_unit == "MB":
+        return memory_bytes/(1024**2)
+    elif output_unit == "GB":
+        return memory_bytes/(1024**3)
+    elif output_unit == "TB":
+        return memory_bytes/(1024**4)
+    else:
+        return "Incorrect unit chosen. Use b, B, KB, MB, GB or TB."
+
 # Variables
 n = 4
 sx_operators, sy_operators, sz_operators = create_operators(n)
 
-# Main Code
+###############################################################################
+# Problem 4
+###############################################################################
+
 plot_table(sy_operators[3], f"Sy operator of the fourth particle, n = {n}")
 plot_table(sx_operators[2], f"Sx operator of the third particle, n = {n}")
 
 sx2_sz2 = evaluate_commutator(sx_operators[2], sz_operators[2], -1j*sy_operators[2])
 print(f"Is the Sx2 and Sz2 commutator equivalent to -i*Sy2? {"Yes!" if sx2_sz2 else "No!"}")
 
+###############################################################################
+# Problem 5
+###############################################################################
+
+print(operators_memory_usage(12, "GB"))
