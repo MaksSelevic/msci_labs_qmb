@@ -147,6 +147,33 @@ def operators_memory_usage_sparse(n_particles, output_unit):
     else:
         return "Incorrect unit chosen. Use b, B, KB, MB, GB or TB."
 
+def operators_memory_usage(n_particles, output_unit, matrix_type):
+    if matrix_type == "dense":
+        n_elements = (2**n_particles)**2
+        # Number of elements * bytes per element * 3 dimensions (xyz) * Number of particles
+        memory_bytes = n_elements*16*3*n_particles
+    elif matrix_type == "sparse":   
+        n_elements = 2**n_particles
+        # Number of elements * bytes per element * 3 dimensions (xyz) * Number of particles
+        memory_bytes = n_elements*20*3*n_particles
+    else:
+        return "Incorrect matrix type chosen. Use 'dense' or 'sparse'"
+    
+    if output_unit == "b":
+        return memory_bytes/8
+    elif output_unit == "B":
+        return memory_bytes
+    elif output_unit == "KB":
+        return memory_bytes/1024
+    elif output_unit == "MB":
+        return memory_bytes/(1024**2)
+    elif output_unit == "GB":
+        return memory_bytes/(1024**3)
+    elif output_unit == "TB":
+        return memory_bytes/(1024**4)
+    else:
+        return "Incorrect unit chosen. Use b, B, KB, MB, GB or TB."
+
 def construction_time_trial(particle_range, repeats):
     trial_times = []
     for i in range(repeats):
@@ -178,6 +205,10 @@ dense_memory_needed_gb = []
 dense_memory_needed_mb = []
 dense_memory_needed_kb = []
 
+sparse_range_gb = range(12, 26)
+
+sparse_memory_needed_gb = []
+
 n_construction_trial = 11
 construction_trial_repeats = 4
 trial_particles = range(2, n_construction_trial+1)
@@ -195,18 +226,18 @@ trial_particles = range(2, n_construction_trial+1)
 # Problem 6
 ###############################################################################
 
-#print(f"{operators_memory_usage_dense(13, "GB"):.3f}")
+print(f"{operators_memory_usage(13, "GB", "dense"):.3f}")
 
 for n in dense_range_gb:
-    memory = operators_memory_usage_dense(n, "GB")
+    memory = operators_memory_usage(n, "GB", "dense")
     dense_memory_needed_gb.append(memory)
 
 for n in dense_range_mb:
-    memory = operators_memory_usage_dense(n, "MB")
+    memory = operators_memory_usage(n, "MB", "dense")
     dense_memory_needed_mb.append(memory)
 
 for n in dense_range_kb:
-    memory = operators_memory_usage_dense(n, "KB")
+    memory = operators_memory_usage(n, "KB", "dense")
     dense_memory_needed_kb.append(memory)
 
 plt.scatter(dense_range_gb, dense_memory_needed_gb)
@@ -236,8 +267,21 @@ plt.show()
 ###############################################################################
 
 # Checking if the sparse matrices match the dense matrices:
-print(f"""Are the sparse matrix operators equivalent to the dense matrices?
-Sx operator of the second particle: {"Yes!" if np.allclose(sx_operators[1], sx_sparse[1].toarray()) else "No!"}
-Sy operator of the fourth particle: {"Yes!" if np.allclose(sy_operators[3], sy_sparse[3].toarray()) else "No!"}
-Sz operator of the fifth particle: {"Yes!" if np.allclose(sz_operators[4], sz_sparse[4].toarray()) else "No!"}
-""")
+#print(f"""Are the sparse matrix operators equivalent to the dense matrices?
+#Sx operator of the second particle: {"Yes!" if np.allclose(sx_operators[1], sx_sparse[1].toarray()) else "No!"}
+#Sy operator of the fourth particle: {"Yes!" if np.allclose(sy_operators[3], sy_sparse[3].toarray()) else "No!"}
+#Sz operator of the fifth particle: {"Yes!" if np.allclose(sz_operators[4], sz_sparse[4].toarray()) else "No!"}""")
+
+sparse_memory_needed_gb = []
+
+for n in sparse_range_gb:
+    memory = operators_memory_usage(n, "GB", "sparse")
+    sparse_memory_needed_gb.append(memory)
+
+plt.scatter(sparse_range_gb, sparse_memory_needed_gb)
+plt.plot(np.linspace(sparse_range_gb[0], sparse_range_gb[-1], 100), [16]*100,  color="red", label="16 GB")
+plt.plot(np.linspace(sparse_range_gb[0], sparse_range_gb[-1], 100), [8]*100,  color="darkorange", label="8 GB")
+plt.xlabel("Number of particles")
+plt.ylabel("Memory required for (Sparse) Operators (GB)")
+plt.legend()
+plt.show()
