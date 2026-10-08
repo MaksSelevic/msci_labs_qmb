@@ -100,9 +100,9 @@ def generate_hamiltonian(size):
 
 # Generating Hamiltonians
 
-for i in range(1, 12+1):
+for i in range(1, 5+1):
     hamiltonian = generate_hamiltonian(i)
-    #sparse.save_npz(f"operators\h_{i}_sparse", hamiltonian)
+    sparse.save_npz(f"operators\h_{i}_sparse", hamiltonian)
     #np.save(f"operators\h_{i}_dense", hamiltonian.toarray())
     
 
