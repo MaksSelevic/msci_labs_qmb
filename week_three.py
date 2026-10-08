@@ -125,9 +125,9 @@ def plot_table(matrix, title):
 # Problem 9
 ###############################################################################
 
-hamiltonian = generate_hamiltonian(10)
+hamiltonian = generate_hamiltonian(6)
 
-eigvals_sparse, eigvecs_sparse = sparse.linalg.eigsh(hamiltonian, k=15, which="SA")
+eigvals_sparse, eigvecs_sparse = sparse.linalg.eigsh(hamiltonian, k=16, which="SA")
 order_sparse = np.argsort(eigvals_sparse)
 eigvals_sparse = eigvals_sparse[order_sparse]
 eigvecs_sparse = eigvecs_sparse[:, order_sparse]
@@ -137,7 +137,13 @@ order_dense = np.argsort(eigvals_dense)
 eigvals_dense = eigvals_dense[order_dense]
 eigvecs_dense = eigvecs_dense[:, order_dense]
 
+eigval_residuals = eigvals_dense[:len(eigvals_sparse)] - eigvals_sparse
+
 print("Are the eigenvalues equivalent for both methods?")
 for i in range(len(eigvals_sparse)):
     close_check = np.isclose(eigvals_sparse[i], eigvals_dense[i])
     print(f"Eigenvalue {i+1}: {"Yes!" if close_check else "No!"}")
+    
+plt.scatter(range(1, len(eigval_residuals)+1), eigval_residuals)
+plt.xlabel(f"First {len(eigvals_sparse)} eigenvalues of the Hamiltonian")
+plt.ylabel("Residuals")
