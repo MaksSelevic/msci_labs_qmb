@@ -118,21 +118,27 @@ def plot_table(matrix, title):
 ###############################################################################
 # Problem 8
 ###############################################################################
-#hamiltonian_test = generate_hamiltonian(2)
-#plot_table(hamiltonian_test.toarray().real, "Hamiltonian of a two particle system")
+hamiltonian_test = sparse.load_npz("operators\h_2_sparse.npz")
+plot_table(hamiltonian_test.toarray().real, "Hamiltonian of a two particle system")
 
 ###############################################################################
 # Problem 9
 ###############################################################################
 
-hamiltonian = generate_hamiltonian(10)
+hamiltonian_10_sparse = sparse.load_npz("operators\h_10_sparse.npz")
+hamiltonian_10_dense = np.load("operators\h_10_dense.npy")
+hamiltonian_11_sparse = sparse.load_npz("operators\h_11_sparse.npz")
+hamiltonian_11_dense = np.load("operators\h_11_dense.npy")
 
-eigvals_sparse, eigvecs_sparse = sparse.linalg.eigsh(hamiltonian, k=15, which="SA")
+test_hamiltonian_sparse = hamiltonian_11_sparse
+test_hamiltonian_dense = hamiltonian_11_dense
+
+eigvals_sparse, eigvecs_sparse = sparse.linalg.eigsh(test_hamiltonian_sparse, k=20, which="SA")
 order_sparse = np.argsort(eigvals_sparse)
 eigvals_sparse = eigvals_sparse[order_sparse]
 eigvecs_sparse = eigvecs_sparse[:, order_sparse]
 
-eigvals_dense, eigvecs_dense = np.linalg.eigh(hamiltonian.toarray())
+eigvals_dense, eigvecs_dense = np.linalg.eigh(test_hamiltonian_dense)
 order_dense = np.argsort(eigvals_dense)
 eigvals_dense = eigvals_dense[order_dense]
 eigvecs_dense = eigvecs_dense[:, order_dense]
