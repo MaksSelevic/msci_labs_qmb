@@ -84,7 +84,7 @@ def create_operators_sparse(size):
 
     return sx_operators, sy_operators, sz_operators
 
-def generate_hamiltonian(size):
+def generate_hamiltonian_sparse(size):
     sx_ops, sy_ops, sz_ops = create_operators_sparse(size)
     
     dimension = 2**size   
@@ -98,11 +98,28 @@ def generate_hamiltonian(size):
         hamiltonian += pair_hamiltonian
     return hamiltonian
 
+def generate_hamiltonian_dense(size):
+    sx_ops, sy_ops, sz_ops = create_operators_dense(size)
+
+    dimension = 2**size
+    hamiltonian = np.zeros((dimension, dimension), dtype=complex)
+
+    for i in range(size):
+        pair_hamiltonian = (np.dot(sx_ops[i], sx_ops[(i+1)%size])+
+                            np.dot(sy_ops[i], sy_ops[(i+1)%size])+
+                            np.dot(sz_ops[i], sz_ops[(i+1)%size]))
+
+        hamiltonian+=pair_hamiltonian
+    return hamiltonian
+
 # Generating Hamiltonians
 
-for i in range(1, 5+1):
-    hamiltonian = generate_hamiltonian(i)
-    sparse.save_npz(f"operators\h_{i}_sparse", hamiltonian)
-    #np.save(f"operators\h_{i}_dense", hamiltonian.toarray())
+for i in range(1, 23+1):
+    hamiltonian_sparse = generate_hamiltonian_sparse(i)
+    sparse.save_npz(f"operators\h_{i}_sparse", hamiltonian_sparse)
+
+for i in range(1, 12+1):
+    hamiltonian_dense = generate_hamiltonian_dense(i)
+    np.save(f"operators\h_{i}_dense", hamiltonian_dense)
     
 
