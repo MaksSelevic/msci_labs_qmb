@@ -31,7 +31,7 @@ def plot_table(matrix, title):
 def eigen_extractor(matrix, matrix_type="sparse", n_eigvals=20):
 
     if matrix_type == "sparse":
-        eigvals, eigvecs = sparse.linalg.eigsh(matrix, k=n_eigvals, ncv=8*n_eigvals, which="SA")
+        eigvals, eigvecs = sparse.linalg.eigsh(matrix, k=n_eigvals, ncv=10*n_eigvals, which="SA")
         order = np.argsort(eigvals)
         eigvals = eigvals[order]
         eigvecs = eigvecs[:, order]
@@ -59,8 +59,8 @@ def eigen_extractor(matrix, matrix_type="sparse", n_eigvals=20):
 #hamiltonian_11_sparse = sparse.load_npz("operators\h_11_sparse.npz")
 #hamiltonian_11_dense = np.load("operators\h_11_dense.npy")
 
-#test_hamiltonian_sparse = hamiltonian_10_sparse
-#test_hamiltonian_dense = hamiltonian_10_dense
+#test_hamiltonian_sparse = hamiltonian_11_sparse
+#test_hamiltonian_dense = hamiltonian_11_dense
 
 #eigvals_sparse_test, eigvecs_sparse_test = eigen_extractor(test_hamiltonian_sparse)
 #eigvals_dense_test, eigvecs_dense_test = eigen_extractor(test_hamiltonian_dense, "dense")
@@ -69,6 +69,8 @@ def eigen_extractor(matrix, matrix_type="sparse", n_eigvals=20):
 #for i in range(len(eigvals_sparse_test)):
 #    close_check = np.isclose(eigvals_sparse_test[i], eigvals_dense_test[i])
 #    print(f"Eigenvalue {i+1}: {"Yes!" if close_check else "No!"}")
+
+###############################################################################
 
 min_n, max_n = 4, 12
 n_eigvals = 12
@@ -85,7 +87,6 @@ for i in range(min_n, max_n+1):
     eigvals_dense, eigvecs_dense = eigen_extractor(hamiltonian_dense,
                                                    "dense",
                                                    n_eigvals=n_eigvals)
-
     eigvals_residuals = eigvals_dense[:n_eigvals] - eigvals_sparse
     residuals.append(eigvals_residuals)
 
@@ -102,7 +103,16 @@ for i in range(max_n-min_n+1):
     res_average = np.sum(abs(residuals[i]))/len(residuals[i])
     residuals_averages.append(res_average)
 
-plt.scatter(range(min_n, max_n+1), residuals_averages)
-plt.xlabel("Number of particles")
-plt.ylabel("Average Absolute Value of Residuals ")
+plt.scatter(range(min_n, max_n+1), residuals_averages, color="b")
+plt.xlabel("Number of Particles")
+plt.ylabel("Average Absolute Value of Residuals")
+plt.show()
+
+m, c = np.polyfit(np.log(range(min_n, max_n+1)), np.log(residuals_averages), 1)
+
+plt.scatter(np.log(range(min_n, max_n+1)), np.log(residuals_averages), color="b")
+plt.plot(np.log(range(min_n, max_n+1)), m*(np.log(range(min_n, max_n+1)))+c, color="r", label=(f"Slope: {m:.2f}"+"\n"+f"Intercept: {c:.2f}"))
+plt.xlabel("log(Number of Particles)")
+plt.ylabel("log(Average Absolute Value of Residuals)")
+plt.legend()
 plt.show()
