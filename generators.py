@@ -7,9 +7,9 @@ A file used to generate and save spin matrices for ease of use.
 @author: Maks
 """
 # Imports
+from time import perf_counter
 import numpy as np
 import scipy.sparse as sparse
-
 
 def create_operators_dense(size):
     sx = 0.5*np.array([[0,1],[1,0]])
@@ -84,7 +84,7 @@ def create_operators_sparse(size):
 
     return sx_operators, sy_operators, sz_operators
 
-def generate_hamiltonian(size):
+def generate_hamiltonian_sparse(size):
     sx_ops, sy_ops, sz_ops = create_operators_sparse(size)
     
     dimension = 2**size   
@@ -98,11 +98,45 @@ def generate_hamiltonian(size):
         hamiltonian += pair_hamiltonian
     return hamiltonian
 
-# Generating Hamiltonians
+def generate_hamiltonian_dense(size):
+    sx_ops, sy_ops, sz_ops = create_operators_dense(size)
 
-for i in range(1, 5+1):
-    hamiltonian = generate_hamiltonian(i)
-    sparse.save_npz(f"operators\h_{i}_sparse", hamiltonian)
-    #np.save(f"operators\h_{i}_dense", hamiltonian.toarray())
-    
+    dimension = 2**size
+    hamiltonian = np.zeros((dimension, dimension), dtype=complex)
+
+    for i in range(size):
+        pair_hamiltonian = (np.dot(sx_ops[i], sx_ops[(i+1)%size])+
+                            np.dot(sy_ops[i], sy_ops[(i+1)%size])+
+                            np.dot(sz_ops[i], sz_ops[(i+1)%size]))
+
+        hamiltonian+=pair_hamiltonian
+    return hamiltonian
+
+# Generating Hamiltonians
+start_sparse = perf_counter()
+for i in range(1, 23+1):
+    hamiltonian_sparse = generate_hamiltonian_sparse(i)
+    #sparse.save_npz(f"operators\h_{i}_sparse", hamiltonian_sparse)
+end_sparse = perf_counter()
+print("\n"+f"It took {end_sparse-start_sparse:.2f}s to generate all 23 sparse matrices."+"\n")
+
+start_dense = perf_counter()
+for i in range(1, 12+1):
+    hamiltonian_dense = generate_hamiltonian_dense(i)
+    #np.save(f"operators\h_{i}_dense", hamiltonian_dense)
+end_dense = perf_counter()
+print(f"It took {end_dense-start_dense:.2f}s to generate all 12 dense matrices."+"\n")
+
+# Loading Hamiltonians
+start_sparse_load = perf_counter()
+for i in range(1, 23+1):
+    sparse.load_npz(f"operators\h_{i}_sparse.npz")
+end_sparse_load = perf_counter()
+print(f"It took {end_sparse_load-start_sparse_load:.2f}s to load all 23 sparse matrices."+"\n")
+
+start_dense_load = perf_counter()
+for i in range(1, 12+1):
+    np.load(f"operators\h_{i}_dense.npy")
+end_dense_load = perf_counter()
+print(f"It took {end_dense_load-start_dense_load:.2f}s to load all 12 dense matrices."+"\n")
 
