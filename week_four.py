@@ -111,29 +111,29 @@ def create_operators(size):
     return sx_operators, sy_operators, sz_operators
 
 # Variables
-dense_3 = np.load("operators\h_3_dense.npy")
-dense_4 = np.load("operators\h_4_dense.npy")
+#dense_3 = np.load("operators\h_3_dense.npy")
+#dense_4 = np.load("operators\h_4_dense.npy")
 dense_5 = np.load("operators\h_5_dense.npy")
-dense_6 = np.load("operators\h_6_dense.npy")
+#dense_6 = np.load("operators\h_6_dense.npy")
 
-sparse_6 = sparse.load_npz("operators\h_6_sparse.npz")
+#sparse_6 = sparse.load_npz("operators\h_6_sparse.npz")
 
-ordered_3 = block_diagonalise_dense(dense_3, 3)
-plot_table(dense_3, "3 Particles")
-plot_table(ordered_3, "3 Particles (ordered)")
+#ordered_3 = block_diagonalise_dense(dense_3, 3)
+#plot_table(dense_3, "3 Particles")
+#plot_table(ordered_3, "3 Particles (ordered)")
 
-ordered_4 = block_diagonalise_dense(dense_4, 4)
-plot_table(dense_4, "4 Particles")
-plot_table(ordered_4, "4 Particles (ordered)")
+#ordered_4 = block_diagonalise_dense(dense_4, 4)
+#plot_table(dense_4, "4 Particles")
+#plot_table(ordered_4, "4 Particles (ordered)")
 
-#ordered_5 = block_diagonalise_dense(dense_5, 5)
-#plot_table(dense_5, "5 Particles")
-#plot_table(ordered_5, "5 Particles (ordered)")
+ordered_5 = block_diagonalise_dense(dense_5, 5)
+plot_table(dense_5, "5 Particles")
+plot_table(ordered_5, "5 Particles (ordered)")
 
-ordered_6 = block_diagonalise_dense(dense_6, 6)
-plot_table(dense_6, "6 Particles")
-plot_table(ordered_6, "6 Particles (ordered)")
+#ordered_6 = block_diagonalise_dense(dense_6, 6)
+#plot_table(dense_6, "6 Particles")
+#plot_table(ordered_6, "6 Particles (ordered)")
 
-sp_ordered_6 = block_diagonalise_sparse(sparse_6, 6)
-plot_table(sparse_6.toarray(), "6 Particles (sp)")
-plot_table(sp_ordered_6.toarray(), "6 Particles (ordered)(sp)")
+#sp_ordered_6 = block_diagonalise_sparse(sparse_6, 6)
+#plot_table(sparse_6.toarray(), "6 Particles (sp)")
+#plot_table(sp_ordered_6.toarray(), "6 Particles (ordered)(sp)")
