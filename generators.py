@@ -8,10 +8,10 @@ A file used to generate and save spin matrices for ease of use.
 """
 # Imports
 from time import perf_counter
-from itertools import permutations
 from math import ceil, floor
 import numpy as np
 import scipy.sparse as sparse
+from numba import jit
 
 def create_operators_dense(size):
     sx = 0.5*np.array([[0,1],[1,0]])
@@ -114,53 +114,90 @@ def generate_hamiltonian_dense(size):
         hamiltonian+=pair_hamiltonian
     return hamiltonian
 
+def sector_states(n_particles, n_up):
+    return [index for index in range(2**n_particles) if index.bit_count()==n_up]
+
 def hamiltonian_middle_dense(n_particles):
 
-    spin_split = ("0"*(floor(n_particles/2)))+("1"*(ceil(n_particles/2)))
-    states = set(permutations(spin_split))
-    states = ["".join(state) for state in states]
+    indices = sector_states(n_particles, ceil(n_particles/2))
+    states = []
+
+    for index in indices:
+        bitstring = format(index, "b")
+        bitstring = bitstring.rjust(n_particles, "0")
+        states.append(bitstring)
 
     hamiltonian = np.zeros((len(states), len(states)))
+    index_tracker = {state:index for index, state in enumerate(states)}
+
     for index, state in enumerate(states):
-        column_values = {state:0.0 for state in states}
-        for spin in range(len(state)):
+        #print("\r"+f"Calculating row {index+1}/{len(states)}.", end="")
+        for spin in range(n_particles):
             spin_1 = state[spin]
             spin_2 = state[(spin+1)%len(state)]
             if spin_1 == spin_2:
-                column_values[state]+=0.25
+                hamiltonian[state, index_tracker[state]]+=0.25
             else:
-                column_values[state]-=0.25
+                hamiltonian[state, index_tracker[state]]-=0.25
+
                 new_state = list(state)
                 new_state[spin] = spin_2
-                new_state[(spin+1)%len(state)] = spin_1
+                new_state[(spin+1)%n_particles] = spin_1
                 new_state = "".join(new_state)
-                column_values[new_state]+=0.5
-        hamiltonian[index] = np.array(list(column_values.values()))
+
+                hamiltonian[index, index_tracker[new_state]]+=0.5
 
     return hamiltonian
 
 def hamiltonian_middle_sparse(n_particles):
 
-    spin_split = ("0"*(floor(n_particles/2)))+("1"*(ceil(n_particles/2)))
-    states = set(permutations(spin_split))
-    states = ["".join(state) for state in states]
+    indices = sector_states(n_particles, ceil(n_particles/2))
 
-    hamiltonian = sparse.csr_matrix((len(states), len(states)))
+    states = []
+    for index in indices:
+        bitstring = format(index, "b")
+        bitstring = bitstring.rjust(n_particles, "0")
+        states.append(bitstring)
+    
+    hamiltonian = sparse.lil_matrix((len(states), len(states)), dtype=float)
+    index_tracker = {state:index for index, state in enumerate(states)}
+
     for index, state in enumerate(states):
-        column_values = {state:0.0 for state in states}
-        for spin in range(len(state)):
+        #print("\r"+f"Calculating row {index+1}/{len(states)}.", end="")
+        for spin in range(n_particles):
             spin_1 = state[spin]
-            spin_2 = state[(spin+1)%len(state)]
+            spin_2 = state[(spin+1)%n_particles]
             if spin_1 == spin_2:
-                column_values[state]+=0.25
+                hamiltonian[index, index_tracker[state]]+=0.25
             else:
-                column_values[state]-=0.25
+                hamiltonian[index, index_tracker[state]]-=0.25
+                
                 new_state = list(state)
                 new_state[spin] = spin_2
-                new_state[(spin+1)%len(state)] = spin_1
+                new_state[(spin+1)%n_particles] = spin_1
                 new_state = "".join(new_state)
-                column_values[new_state]+=0.5
-        hamiltonian[index] = sparse.csr_array(list(column_values.values()))
+
+                hamiltonian[index, index_tracker[new_state]]+=0.5
+
+    return hamiltonian
+
+def hamiltonian_middle_sparse_bit(n_particles):
+    
+    states = sector_states(n_particles, ceil(n_particles/2))
+    hamiltonian = sparse.lil_matrix((len(states), len(states)), dtype=float)
+    index_tracker = {state:index for index, state in enumerate(states)}
+
+    for index, state in enumerate(states):
+        #print("\r"+f"Calculating row {index+1}/{len(states)}.", end="")
+        for spin in range(n_particles):
+            bit1 = 2**spin
+            bit2 = 2**((spin+1)%n_particles)
+            mask = bit1 + bit2
+            if (state & mask) == bit1 or (state&mask) == bit2:
+                hamiltonian[index, index_tracker[state]]-=0.25
+                hamiltonian[index, index_tracker[state ^ mask]]+=0.5
+            else:
+                hamiltonian[index, index_tracker[state]]+=0.25
 
     return hamiltonian
 
@@ -192,31 +229,33 @@ def hamiltonian_middle_sparse(n_particles):
 #end_dense_load = perf_counter()
 #print(f"It took {end_dense_load-start_dense_load:.2f}s to load all 12 dense matrices."+"\n")
 
-#h_4_dense = np.load("operators\h_4_dense.npy")
-#h_4_middle = hamiltonian_middle_dense(4)
+# Testiing
 
-#h_6_dense = np.load("operators\h_6_dense.npy")
-#h_6_middle = hamiltonian_middle_dense(6)
-#h_6_middle_sparse = hamiltonian_middle_sparse(6).toarray()
+#start = perf_counter()
+#h_20_mid = hamiltonian_middle_sparse(20)
+#end = perf_counter()
+#print("\n"+f"{end-start}")
 
-#h_5_sparse = sparse.load_npz("operators\h_5_sparse.npz")
-#h_5_middle_sparse = hamiltonian_middle_sparse(5)
+#h_23_sparse = sparse.load_npz("operators\h_23_sparse.npz")
+
+#t1 = perf_counter()
+#h_23_mid_bit = hamiltonian_middle_sparse_bit(23)
+#t2 = perf_counter()
+#print("\n"+f"Middle block construction time: {t2-t1:.2f}s.")
+
+#e_20_old = sparse.linalg.eigsh(h_20_mid, k=10, ncv=40, which="SA", return_eigenvectors=False)
+#t3 = perf_counter()
+#e_23_full = sparse.linalg.eigsh(h_23_sparse, k=20, ncv=80, which="SA", return_eigenvectors=False)
+#t4 = perf_counter()
+#print("\n"+f"Full matrix eigenvalues found in {t4-t3:.2f}s.")
+#t5 = perf_counter()
+#e_23_bit = sparse.linalg.eigsh(h_23_mid_bit, k=10, ncv=40, which="SA", return_eigenvectors=False)
+#t6 = perf_counter()
+#print("\n"+f"Miiddle matrix eigenvalues found in {t6-t5:.2f}s.")
+
+t7 = perf_counter()
+h_26_mid_bit = hamiltonian_middle_sparse_bit(26)
+t8 = perf_counter()
+print(f"Middle block construction time for 26 particles: {t8-t7:.2f}s.")
 
 
-#full_4_e, full_4_e_vecs = np.linalg.eigh(h_4_dense)
-#mid_4_e, mid_4_e_vecs = np.linalg.eigh(h_4_middle)
-
-#full_6_e, full_6_e_vecs = np.linalg.eigh(h_6_dense)
-#mid_6_e, mid_6_e_vecs = np.linalg.eigh(h_6_middle)
-
-#h_12_dense = np.load("operators\h_12_dense.npy")
-#h_12_middle = hamiltonian_middle_dense(12)
-
-#full_12_e, full_12_e_vecs = np.linalg.eigh(h_12_dense)
-#mid_12_e, mid_12_e_vecs = np.linalg.eigh(h_12_middle)
-                                       
-#h_14_sparse = sparse.load_npz("operators\h_14_sparse.npz")
-#h_14_mid = hamiltonian_middle_sparse(14)
-
-#full_14_e = sparse.linalg.eigsh(h_14_sparse, k=10, ncv=100, which="SA", return_eigenvectors=False)
-#mid_14_e = sparse.linalg.eigsh(h_14_mid, k=10, ncv=100, which="SA", return_eigenvectors=False)

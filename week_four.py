@@ -8,6 +8,7 @@ Created on Thu Oct 15 10:24:12 2026
 """
 
 # Imports
+from math import comb, ceil
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import sparse
@@ -29,20 +30,23 @@ def plot_table(matrix, title):
     ax.set_yticks([])
     ax.set_title(title)
 
-def sector_states(L, n_up):
-        
-    all_states = np.arange(2**L)
-    number_of_ones = np.zeros(2**L, dtype = int)
-    for i in range(L):
-        number_of_ones += (all_states >> i) & 1 
+#def sector_states(L, n_up):
+#        
+#    all_states = np.arange(2**L)
+#    number_of_ones = np.zeros(2**L, dtype = int)
+#    for i in range(L):
+#        number_of_ones += (all_states >> i) & 1
+#
+#    return all_states[number_of_ones == n_up]
 
-    return all_states[number_of_ones == n_up]
+def sector_states(n_particles, n_up):
+    return [index for index in range(2**n_particles) if index.bit_count()==n_up]
 
 def order(L):
     index_order = np.empty(0, dtype=int)
 
     for i in range(L+1):
-        indeces = sector_states(L, i)
+        indeces = np.array(sector_states(L, i))
         index_order = np.concatenate((index_order, indeces))
     return index_order
 
@@ -113,7 +117,7 @@ def create_operators(size):
 # Variables
 #dense_3 = np.load("operators\h_3_dense.npy")
 #dense_4 = np.load("operators\h_4_dense.npy")
-dense_5 = np.load("operators\h_5_dense.npy")
+#dense_5 = np.load("operators\h_5_dense.npy")
 #dense_6 = np.load("operators\h_6_dense.npy")
 
 #sparse_6 = sparse.load_npz("operators\h_6_sparse.npz")
@@ -126,9 +130,9 @@ dense_5 = np.load("operators\h_5_dense.npy")
 #plot_table(dense_4, "4 Particles")
 #plot_table(ordered_4, "4 Particles (ordered)")
 
-ordered_5 = block_diagonalise_dense(dense_5, 5)
-plot_table(dense_5, "5 Particles")
-plot_table(ordered_5, "5 Particles (ordered)")
+#ordered_5 = block_diagonalise_dense(dense_5, 5)
+#plot_table(dense_5, "5 Particles")
+#plot_table(ordered_5, "5 Particles (ordered)")
 
 #ordered_6 = block_diagonalise_dense(dense_6, 6)
 #plot_table(dense_6, "6 Particles")
@@ -137,3 +141,4 @@ plot_table(ordered_5, "5 Particles (ordered)")
 #sp_ordered_6 = block_diagonalise_sparse(sparse_6, 6)
 #plot_table(sparse_6.toarray(), "6 Particles (sp)")
 #plot_table(sp_ordered_6.toarray(), "6 Particles (ordered)(sp)")
+
