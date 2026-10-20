@@ -16,25 +16,29 @@ import matplotlib.pyplot as plt
 n_particles_max = 26
 e_density_even = np.zeros(int((n_particles_max-2)/2))
 e_density_odd = np.zeros(int((n_particles_max-2)/2))
+indices_odd = np.arange(3, n_particles_max, 2)
+indices_even = np.arange(4, n_particles_max+1, 2)
 
-for i in range(3, n_particles_max, 2):
+for i in indices_odd:
     hamiltonian = sparse.load_npz(f"operators\h_{i}_mid_sparse.npz")
     e_ground = sparse.linalg.eigsh(hamiltonian, k=1, ncv=10, which="SA", return_eigenvectors=False)
     e_density_odd[int((i-3)/2)] = e_ground[0]/i
-#np.save("results\e_density_ground_odd.npy", e_density_odd)
+e_odd_indexed = np.stack((indices_odd, e_density_odd))
+#np.save("results\e_density_ground_odd.npy", e_odd_indexed)
 
-for i in range(4, n_particles_max+1, 2):
+for i in indices_even:
     hamiltonian = sparse.load_npz(f"operators\h_{i}_mid_sparse.npz")
     e_ground = sparse.linalg.eigsh(hamiltonian, k=1, ncv=10, which="SA", return_eigenvectors=False)
     e_density_even[int((i-3)/2)] = e_ground[0]/i
-#np.save("results\e_density_ground_even.npy", e_density_even)
+e_even_indexed = np.stack((indices_even, e_density_even))
+#np.save("results\e_density_ground_even.npy", e_even_indexed)
 
-plt.scatter(range(3, n_particles_max, 2),
-            e_density_odd,
+plt.scatter(e_odd_indexed[0],
+            e_odd_indexed[1],
             s=20, color="darkorange",
             label="Odd n")
-plt.scatter(range(4, n_particles_max+1, 2),
-            e_density_even,
+plt.scatter(e_even_indexed[0],
+            e_even_indexed[1],
             s=20,
             color="r",
             label="Even n")
