@@ -11,7 +11,7 @@ from time import perf_counter
 from math import ceil, floor
 import numpy as np
 import scipy.sparse as sparse
-from numba import jit
+import matplotlib.pyplot as plt
 
 def create_operators_dense(size):
     sx = 0.5*np.array([[0,1],[1,0]])
@@ -201,16 +201,32 @@ def hamiltonian_middle_sparse_bit(n_particles):
 
     return hamiltonian
 
+def plot_table(matrix, title):
+    fig, ax = plt.subplots()
+    norm = plt.Normalize(-1, 1)
+    if np.all(matrix == np.conj(matrix)):
+        matrix = matrix.real
+    table = ax.table(cellText=matrix,
+                     loc=(0,0), cellLoc="center",
+                     cellColours=plt.cm.coolwarm_r(norm(np.abs(matrix))))
+    for i in range(len(matrix)):
+        for j in range(len(matrix)):
+            cell = table[i, j]
+            cell.set_height(1/len(matrix))
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_title(title)
+
 # Generating Hamiltonians
 #start_sparse = perf_counter()
-#for i in range(1, 23+1):
+#for i in range(2, 23+1):
 #    hamiltonian_sparse = generate_hamiltonian_sparse(i)
     #sparse.save_npz(f"operators\h_{i}_sparse", hamiltonian_sparse)
 #end_sparse = perf_counter()
 #print("\n"+f"It took {end_sparse-start_sparse:.2f}s to generate all 23 sparse matrices."+"\n")
 
 #start_dense = perf_counter()
-#for i in range(1, 12+1):
+#for i in range(2, 12+1):
 #    hamiltonian_dense = generate_hamiltonian_dense(i)
     #np.save(f"operators\h_{i}_dense", hamiltonian_dense)
 #end_dense = perf_counter()
@@ -218,44 +234,18 @@ def hamiltonian_middle_sparse_bit(n_particles):
 
 # Loading Hamiltonians
 #start_sparse_load = perf_counter()
-#for i in range(1, 23+1):
+#for i in range(2, 23+1):
 #    sparse.load_npz(f"operators\h_{i}_sparse.npz")
 #end_sparse_load = perf_counter()
 #print(f"It took {end_sparse_load-start_sparse_load:.2f}s to load all 23 sparse matrices."+"\n")
 
 #start_dense_load = perf_counter()
-#for i in range(1, 12+1):
+#for i in range(2, 12+1):
 #    np.load(f"operators\h_{i}_dense.npy")
 #end_dense_load = perf_counter()
 #print(f"It took {end_dense_load-start_dense_load:.2f}s to load all 12 dense matrices."+"\n")
 
-# Testiing
-
-#start = perf_counter()
-#h_20_mid = hamiltonian_middle_sparse(20)
-#end = perf_counter()
-#print("\n"+f"{end-start}")
-
-#h_23_sparse = sparse.load_npz("operators\h_23_sparse.npz")
-
-#t1 = perf_counter()
-#h_23_mid_bit = hamiltonian_middle_sparse_bit(23)
-#t2 = perf_counter()
-#print("\n"+f"Middle block construction time: {t2-t1:.2f}s.")
-
-#e_20_old = sparse.linalg.eigsh(h_20_mid, k=10, ncv=40, which="SA", return_eigenvectors=False)
-#t3 = perf_counter()
-#e_23_full = sparse.linalg.eigsh(h_23_sparse, k=20, ncv=80, which="SA", return_eigenvectors=False)
-#t4 = perf_counter()
-#print("\n"+f"Full matrix eigenvalues found in {t4-t3:.2f}s.")
-#t5 = perf_counter()
-#e_23_bit = sparse.linalg.eigsh(h_23_mid_bit, k=10, ncv=40, which="SA", return_eigenvectors=False)
-#t6 = perf_counter()
-#print("\n"+f"Miiddle matrix eigenvalues found in {t6-t5:.2f}s.")
-
-t7 = perf_counter()
-h_26_mid_bit = hamiltonian_middle_sparse_bit(26)
-t8 = perf_counter()
-print(f"Middle block construction time for 26 particles: {t8-t7:.2f}s.")
-
-
+for i in range(2, 26+1):
+    print(f"Generating the Hamiltonian for a {i}-particle system.")
+    hamiltonian_mid = hamiltonian_middle_sparse_bit(i)
+    sparse.save_npz(f"operators\h_{i}_mid_sparse", hamiltonian_mid.tocsr())
