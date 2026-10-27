@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Main code
-n_particles_max = 26
+n_particles_max = 16
 e_density_even = np.zeros(int((n_particles_max-2)/2))
 e_density_odd = np.zeros(int((n_particles_max-2)/2))
 indices_odd = np.arange(3, n_particles_max, 2)

@@ -94,3 +94,29 @@ plt.xlabel(r"$1/n^2$")
 plt.ylabel("Ground State Energy Density")
 plt.legend()
 plt.show()
+
+###############################################################################
+# Energy Difference
+###############################################################################
+
+e_first_two_even = np.load(r"results\first_two_e_even.npy")
+n_inverse_diff = 1.0/e_first_two_even[0,1:]
+e_diff = e_first_two_even[2,1:]-e_first_two_even[1,1:]
+coefs_e_diff = np.polyfit(n_inverse_diff, e_diff, 1)
+
+plt.scatter(n_inverse_diff,
+            e_diff,
+            s = 20,
+            color="crimson",
+            label=r"$\Delta E$")
+plt.plot(n_inverse_diff,
+         np.polyval(coefs_e_diff, n_inverse_diff),
+         color="black",
+         linestyle="--",
+         label=f"""Slope: {coefs_e_diff[0]:0.3f}
+Intercept: {coefs_e_diff[1]:0.3f}
+""")
+plt.xlabel(r"$1/n$")
+plt.ylabel(r"$\Delta E$ between $|e\rangle$ and $|g\rangle$")
+plt.legend()
+plt.show()
