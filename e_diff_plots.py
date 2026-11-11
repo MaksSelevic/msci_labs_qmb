@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 e_first_two_even = np.load(r"results\first_two_e_even.npy")
 n = e_first_two_even[0]
 n_inverse = 1.0/n
-e_diff = e_first_two_even[2]-e_first_two_even[1]
+e_diff = e_first_two_even[1]-e_first_two_even[2]
 coefs_e_diff = np.polyfit(n_inverse, e_diff, 1)
 
 plt.scatter(n_inverse,

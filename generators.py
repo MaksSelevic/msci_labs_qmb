@@ -201,6 +201,51 @@ def hamiltonian_middle_sparse_bit(n_particles):
 
     return hamiltonian
 
+def ising_hamiltonian_sparse(n_particles, g):
+    sx = sparse.csr_matrix([[0,0.5],[0.5,0]], dtype=float)
+    sz = sparse.csr_matrix([[0.5,0],[0,-0.5]], dtype=float)
+    
+    identity = sparse.identity(2, format="csr", dtype=float)
+
+    sx_operators = []
+    sz_operators = []
+
+    for j in range(n_particles):
+        factors_x = [identity]*n_particles
+        factors_z = [identity]*n_particles
+
+        factors_x[j] = sx
+        factors_z[j] = sz
+
+        operator_x = factors_x[0]
+        operator_z = factors_z[0]
+
+        for factor_x in factors_x[1:]:
+            operator_x = sparse.kron(operator_x, factor_x, format="csr")
+        for factor_z in factors_z[1:]:
+            operator_z = sparse.kron(operator_z, factor_z, format="csr")
+
+        sx_operators.append(operator_x)
+        sz_operators.append(operator_z)
+
+    dimension = 2**n_particles   
+    hamiltonian = sparse.csr_matrix((dimension, dimension), dtype = float)
+
+    for i in range(n_particles):
+        x_part = -(g/2)*sx_operators[i]
+        z_part = -(sz_operators[i]@sz_operators[(i+1)%n_particles])
+        hamiltonian += (x_part+z_part)
+    return hamiltonian
+
+def projection_sparse(matrix, n_particles):
+    indices = sector_states(n_particles, ceil(n_particles/2))
+    projection = sparse.lil_matrix((2**n_particles, len(indices)), dtype=float)
+
+    for i, j in enumerate(indices):
+        projection[j, i] = 1.0
+
+    return projection.transpose() @ matrix @ projection
+
 def plot_table(matrix, title):
     fig, ax = plt.subplots()
     norm = plt.Normalize(-1, 1)
@@ -245,7 +290,7 @@ def plot_table(matrix, title):
 #end_dense_load = perf_counter()
 #print(f"It took {end_dense_load-start_dense_load:.2f}s to load all 12 dense matrices."+"\n")
 
-for i in range(2, 26+1):
-    print(f"Generating the Hamiltonian for a {i}-particle system.")
-    hamiltonian_mid = hamiltonian_middle_sparse_bit(i)
-    sparse.save_npz(f"operators\h_{i}_mid_sparse", hamiltonian_mid.tocsr())
+#for i in range(2, 26+1):
+#    print(f"Generating the Hamiltonian for a {i}-particle system.")
+#    hamiltonian_mid = hamiltonian_middle_sparse_bit(i)
+#    sparse.save_npz(f"operators\h_{i}_mid_sparse", hamiltonian_mid.tocsr())
